@@ -76,7 +76,6 @@
           </div>
         </div>
       </section>
-
       <main class="main">
         <nav>
           <form class="search" action="#" method="#">
@@ -91,11 +90,48 @@
           </form>
         </nav>
         <div class="main-block">
-          <section class="main-filters"></section>
+          <div class="main-filters">
+            <button class="accordion">Price</button>
+            <div class="panel">
+              <form action="" class="price-range">
+                <div class="from-container">
+                  <label for="" class="from-label">From</label>
+                  <input type="number" class="from-to-input" />
+                </div>
+                <div class="to-container">
+                  <label for="" class="to-label">To</label>
+                  <input type="number" class="from-to-input" />
+                </div>
+              </form>
+            </div>
+            <button class="accordion">Color</button>
+            <div class="panel">
+              <label>Red <input type="checkbox" /></label>
+
+              <label>Black <input type="checkbox" /></label>
+            </div>
+
+            <button class="accordion">Memory</button>
+            <div class="panel">
+              <label>32 Gb <input type="checkbox" /></label>
+              <label>64 Gb <input type="checkbox" /></label>
+            </div>
+            <button class="accordion">OS</button>
+            <div class="panel">
+              <label>IOS <input type="checkbox" /></label>
+              <label>Mac OS <input type="checkbox" /></label>
+            </div>
+            <button class="accordion">Display</button>
+            <div class="panel">
+              <label>2 - 5 inch <input type="checkbox" /></label>
+              <label>5 - 7 inch <input type="checkbox" /></label>
+            </div>
+          </div>
           <ul class="main-goods"></ul>
         </div>
+        <div class="main-modal hidden"></div>
+        <div class="overlay hidden"></div>
       </main>
-      <button disabled class="primary-button btn">jjjjj</button>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
     <script src="js/items.js"></script>

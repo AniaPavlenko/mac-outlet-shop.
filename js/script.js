@@ -1,6 +1,14 @@
 'use strict';
 
-new Swiper('.swiper');
+// swiper set up
+new Swiper('.swiper', {
+  autoplay: {
+    delay: 2000,
+    stopOnLastSlide: false,
+    disableOnIteraction: false,
+  },
+  speed: 800,
+});
 
 class Item {
   constructor(item) {
@@ -66,30 +74,115 @@ class RenderCards {
     </div>
     `;
 
-    //like/dislike
+    //like & dislike
     const likeBtn = cardElem.querySelector('.card-like');
 
     if (item.isliked) {
       likeBtn.src = 'img/icons/like_filled.svg';
     }
 
-    likeBtn.addEventListener('click', () => {
+    likeBtn.addEventListener('click', e => {
       likeBtn.classList.toggle('card-like-active');
+      e.stopPropagation();
     });
 
-    //disable button
-    const buttonDisable = cardElem.querySelector('.primary-button');
+    //buttons set up
+    const primaryButton = cardElem.querySelector('.primary-button');
     const iconDisable = cardElem.querySelector('.card-availability');
 
     if (item.isAvailableToPurchase) {
-      cardElem.addEventListener('click', () => {
-        console.log('click'); //temporary (showing that button work)
+      primaryButton.addEventListener('click', e => {
+        e.stopPropagation();
       });
     } else {
-      buttonDisable.disabled = true;
-      buttonDisable.classList.add('disable-button');
+      primaryButton.disabled = true;
+      primaryButton.classList.add('disable-button');
       iconDisable.classList.add('card-non-availability');
     }
+
+    // modal functional block
+    const addModal = function () {
+      const modal = document.querySelector('.main-modal');
+      const overlay = document.querySelector('.overlay');
+
+      modal.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+
+      const closeModal = function () {
+        modal.classList.add('hidden');
+        overlay.classList.add('hidden');
+      };
+
+      overlay.addEventListener('click', closeModal);
+
+      // modal can be closed by ESC button on keyboard
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          closeModal();
+        }
+      });
+
+      modal.innerHTML = `
+        <div class="modal-img-container">
+        <img class="modal-img" src="${item.absoluteImgPath}" alt="${
+        item.name
+      }" />
+      </div>
+      <div class="modal-middle-block">
+        <p class="modal-title">${item.name}</p>
+        <div class="modal-review-container">
+          <p class="modal-review review">
+            <span class="mark">${
+              item.orderInfo.reviews
+            }%</span> Positive reviews Above avarage
+          </p>
+          <p class="modal-review-orders">
+            <span class="mark">${Math.trunc(Math.random() * 1500)}</span> orders
+          </p>
+        </div>
+        <ul class="modal-item-details">
+          <li class="modal-item-color">
+            <span class="modal-item-mark">Color:</span> ${item.color.join(', ')}
+          </li>
+          <li class="modal-item-os">
+            <span class="modal-item-mark">Operating System:</span> ${item.os}
+          </li>
+          <li class="modal-item-chip">
+            <span class="modal-item-mark">Chip:</span> ${item.chip.name}${
+        item.chip.cores
+      }
+          </li>
+          <li class="modal-item-height">
+            <span class="modal-item-mark">Height:</span> ${item.size.height} cm
+          </li>
+          <li class="modal-item-width">
+            <span class="modal-item-mark">Width:</span> ${item.size.width} cm
+          </li>
+          <li class="modal-item-depth">
+            <span class="modal-item-mark">Depth:</span> ${item.size.depth} cm
+          </li>
+          <li class="modal-item-weight">
+            <span class="modal-item-mark">Weight:</span> ${item.size.weight} g
+          </li>
+        </ul>
+      </div>
+      <div class="modal-item-sale-data">
+        <p class="modal-price">$ ${item.price}</p>
+        <p class="modal-left-in-stock">
+          Stock: <span class="mark">${item.orderInfo.inStock}</span> pcs.
+        </p>
+        <button class="primary-button">Add to cart</button>
+      </div>      
+        `;
+
+      const primaryButton = modal.querySelector('.primary-button');
+      if (!item.isAvailableToPurchase) {
+        primaryButton.disabled = true;
+        primaryButton.classList.add('disable-button');
+      }
+    };
+
+    cardElem.addEventListener('click', addModal);
 
     return cardElem;
   }
@@ -106,9 +199,27 @@ class RenderCards {
 const itemsBase = new GoodsDataBase();
 const renderCards = new RenderCards(itemsBase);
 
-const liveSearch = document.querySelector('.search-request');
+// --------------- in progress, will be changed -------------- //
 
-liveSearch.oninput = event => {
-  const foundItems = itemsBase.searchByName(event.target.value);
-  renderCards.rendering(foundItems);
-};
+// const liveSearch = document.querySelector('.search-request');
+
+// liveSearch.oninput = event => {
+//   const foundItems = itemsBase.searchByName(event.target.value);
+//   renderCards.rendering(foundItems);
+// };
+
+// accordion
+const accButtons = document.getElementsByClassName('accordion');
+
+for (let accButton of accButtons) {
+  accButton.addEventListener('click', function () {
+    this.classList.toggle('active');
+
+    const panel = this.nextElementSibling;
+    if (panel.style.display === 'block') {
+      panel.style.display = 'none';
+    } else {
+      panel.style.display = 'block';
+    }
+  });
+}
