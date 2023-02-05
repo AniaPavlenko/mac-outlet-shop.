@@ -123,6 +123,7 @@
   display: flex;
   justify-content: space-around;
   flex-wrap: wrap;
+  align-items: flex-start;
 }
 
 .card-item {
@@ -348,43 +349,77 @@
   outline: none;
   transition: 0.4s;
   font: 18px/140% 'Roboto', sans-serif;
+  display: flex;
+  justify-content: space-between;
 }
 
 .active {
   background-color: #fff;
 }
+
+.active img {
+  transform: rotate(90deg);
+}
+
 .accordion:hover {
   background-color: #dce2ee;
 }
 
-.panel:last-child {
+.accordion-panel:last-child {
   border-bottom-right-radius: 5px;
   border-bottom-left-radius: 5px;
 }
 
-.panel {
-  padding: 0 18px;
+.accordion-panel {
+  padding: 15px 40px 15px 30px;
   background-color: white;
   display: none;
   overflow: hidden;
   border: 1px solid #dce2ee;
+  font: 16px/140% 'Roboto';
 }
 
-/* ---------- inputs` style ----------*/
-
-.price-range {
-  padding: 23px 40px 33px 20px;
-}
-.from-container {
-  margin-bottom: 10px;
-}
-.from-to-input {
-  padding: 7px 0 11px;
-  text-align: center;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-.panel label {
+.accordion-panel label {
   display: block;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.accordion-panel label input {
+  width: 30px;
+}
+
+.accordion-panel-price {
+  padding: 30px 30px 20px 30px;
+  border: 1px solid #dce2ee;
+  display: none;
+}
+
+.accordion-panel-price label {
+  display: flex;
+  justify-content: space-between;
+}
+
+.min-price-input,
+.max-price-input {
+  margin-bottom: 15px;
+  padding: 8px 0;
+  border: 1px solid #e2e2e2;
+  border-radius: 5px;
+  font-size: 14px;
+  text-align: center;
+  font: 18px/140% 'Roboto';
+}
+
+.max-price-input:focus {
+  border: 1px solid #e2e2e2;
+  box-shadow: 0px 1px 7px 1px #e2e2e2;
+  outline: none;
+}
+
+.min-price-input:focus {
+  border: 1px solid #e2e2e2;
+  box-shadow: 0px 1px 7px 1px #e2e2e2;
+  outline: none;
 }

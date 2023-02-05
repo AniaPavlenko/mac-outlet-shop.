@@ -28,6 +28,78 @@ class Item {
   toggleLike() {
     return (this.isliked = !this.isliked);
   }
+
+  checkIsNameIncludes(name) {
+    const itemTitleToLowerCase = name.toLowerCase();
+    return this.name.toLowerCase().includes(itemTitleToLowerCase);
+  }
+
+  checkIsColorIncludes(colors) {
+    if (!colors.length) return true;
+
+    for (const color of colors) {
+      const isExist = this.color.includes(color);
+      if (isExist) {
+        return true;
+      }
+      return false;
+    }
+  }
+
+  checkIsStorageIncludes(storages) {
+    if (!storages.length) return true;
+
+    for (const storage of storages) {
+      if (this.storage === storage) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  checkIsOSIncludes(opSystems) {
+    if (!opSystems.length) return true;
+
+    for (const os of opSystems) {
+      if (this.os === os) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  checkIsDisplayIncludes(displays) {
+    if (!displays.length) return true;
+
+    for (const display of displays) {
+      if (display === '<5' && this.display < 5) {
+        return true;
+      }
+      if (display === '5-7' && this.display >= 5 && this.display < 7) {
+        return true;
+      }
+      if (display === '7-12' && this.display >= 7 && this.display < 12) {
+        return true;
+      }
+      if (display === '12-16' && this.display >= 12 && this.display <= 16) {
+        return true;
+      }
+      if (display === '+16' && this.display > 16 && this.display !== null) {
+        return true;
+      }
+    }
+  }
+
+  checkIsPriceIncludes(prices) {
+    if (!prices.length) return true;
+
+    for (const price of prices) {
+      if (this.price === price) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 class GoodsDataBase {
@@ -35,12 +107,82 @@ class GoodsDataBase {
     this.items = items.map(item => new Item(item));
   }
 
-  searchByName(itemTitle) {
-    const itemTitleToLowerCase = itemTitle.toLowerCase();
+  get availableColors() {
+    return this.items
+      .reduce((acc, item) => [...acc, ...item.color], [])
+      .filter((item, index, arr) => arr.indexOf(item) === index);
+  }
+
+  get availableStorage() {
+    return this.items
+      .map(item => item.storage)
+      .filter(
+        (item, index, arr) => arr.indexOf(item) === index && item !== null
+      );
+  }
+
+  get availableOS() {
+    return this.items
+      .map(item => item.os)
+      .filter(
+        (item, index, arr) => arr.indexOf(item) === index && item !== null
+      );
+  }
+
+  get availableDisplay() {
+    let allDisplays = ['<5', '5-7', '7-12', '12-16', '+16'];
+    return allDisplays.filter(
+      (item, index, arr) => arr.indexOf(item) === index && item !== null
+    );
+  }
+
+  get availablePrice() {
+    return this.items
+      .map(item => item.price)
+      .filter(
+        (item, index, arr) => arr.indexOf(item) === index && item !== null
+      );
+  }
+
+  searchByName(name) {
+    const itemNameToLowerCase = name.toLowerCase();
 
     return this.items.filter(item =>
-      item.name.toLowerCase().includes(itemTitleToLowerCase)
+      item.name.toLowerCase().includes(itemNameToLowerCase)
     );
+  }
+
+  filterItems(filter = {}) {
+    const {
+      name = '',
+      color = [],
+      storage = [],
+      os = [],
+      display = [],
+      price = [],
+    } = filter;
+
+    return this.items.filter(item => {
+      const isNameIncluded = item.checkIsNameIncludes(name);
+      if (!isNameIncluded) return false;
+
+      const isColorIncluded = item.checkIsColorIncludes(color);
+      if (!isColorIncluded) return false;
+
+      const isStorageIncluded = item.checkIsStorageIncludes(storage);
+      if (!isStorageIncluded) return false;
+
+      const isOSIncluded = item.checkIsOSIncludes(os);
+      if (!isOSIncluded) return false;
+
+      const isDisplyIncluded = item.checkIsDisplayIncludes(display);
+      if (!isDisplyIncluded) return false;
+
+      const isPriceIncluded = item.checkIsPriceIncludes(price);
+      if (!isPriceIncluded) return false;
+
+      return true;
+    });
   }
 }
 
@@ -148,9 +290,7 @@ class RenderCards {
             <span class="modal-item-mark">Operating System:</span> ${item.os}
           </li>
           <li class="modal-item-chip">
-            <span class="modal-item-mark">Chip:</span> ${item.chip.name}${
-        item.chip.cores
-      }
+            <span class="modal-item-mark">Chip:</span> ${item.chip.name}
           </li>
           <li class="modal-item-height">
             <span class="modal-item-mark">Height:</span> ${item.size.height} cm
@@ -196,30 +336,179 @@ class RenderCards {
   }
 }
 
+class Filter {
+  #itemsBase = null;
+  #rendering = null;
+  constructor(itemsBase, rendering) {
+    this.name = '';
+    this.sort = 'default';
+    this.color = [];
+    this.storage = [];
+    this.os = [];
+    this.display = [];
+    this.from = 0;
+    this.to = Infinity;
+    this.#itemsBase = itemsBase;
+    this.#rendering = rendering;
+  }
+
+  setFilter(key, value) {
+    if (!Array.isArray(this[key])) {
+      this[key] = value;
+      this.#findAndRerender();
+      console.log(this);
+      return;
+    }
+
+    if (this[key].includes(value)) {
+      this[key] = this[key].filter(val => val !== value);
+    } else {
+      this[key].push(value);
+    }
+    this.#findAndRerender();
+    console.log(this);
+  }
+
+  #findAndRerender() {
+    const items = this.#itemsBase.filterItems({ ...this });
+    console.log('uuuuu', items);
+    this.#rendering.rendering(items);
+  }
+}
+
+class RenderFilters {
+  #filter = null;
+  constructor(itemsBase, filter) {
+    this.#filter = filter;
+    this.filterContainer = document.querySelector('.main-filters');
+    this.filterOptions = [
+      {
+        displayName: 'Price',
+        name: 'price',
+        options: itemsBase.availablePrice,
+      },
+      {
+        displayName: 'Color',
+        name: 'color',
+        options: itemsBase.availableColors,
+      },
+      {
+        displayName: 'Memory',
+        name: 'storage',
+        options: itemsBase.availableStorage,
+      },
+      {
+        displayName: 'OS',
+        name: 'os',
+        options: itemsBase.availableOS,
+      },
+
+      {
+        displayName: 'Display',
+        name: 'display',
+        options: itemsBase.availableDisplay,
+      },
+    ];
+
+    // search in search line
+    const liveSearch = document.querySelector('.search-request');
+
+    liveSearch.oninput = event => {
+      const foundItems = itemsBase.searchByName(event.target.value);
+      renderCards.rendering(foundItems);
+    };
+
+    this.filterRendering(this.filterOptions);
+  }
+
+  renderFilter(optionsData) {
+    const filterAccordion = document.createElement('button');
+    filterAccordion.className = 'accordion';
+
+    filterAccordion.innerHTML = `
+    <p class="accordion-title">${optionsData.displayName}</p>
+    <img class="accordion-icon" src="img/icons/arrow_left.svg" alt=""/>
+    `;
+    this.filterContainer.append(filterAccordion);
+
+    const accordionPanel = document.createElement('div');
+    accordionPanel.className = 'accordion-panel';
+
+    if (optionsData.name !== 'price') {
+      // creating html for all filters but price
+      const optionsElements = optionsData.options.map(option => {
+        const filterOption = document.createElement('label');
+        filterOption.innerHTML = `<span>${option}</span>`;
+
+        const filterCheckbox = document.createElement('input');
+        filterCheckbox.type = 'checkbox';
+        filterCheckbox.value = option;
+        filterCheckbox.onchange = () => {
+          this.#filter.setFilter(optionsData.name, option);
+        };
+
+        filterOption.appendChild(filterCheckbox);
+
+        return filterOption;
+      });
+      accordionPanel.append(...optionsElements);
+      this.filterContainer.append(accordionPanel);
+    }
+
+    if (optionsData.name === 'price') {
+      //creating html for price filter
+      const priceMin = document.createElement('label');
+      const priceMax = document.createElement('label');
+      const inputPriceMin = document.createElement('input');
+      const inputPriceMax = document.createElement('input');
+      const inputPriceMinName = document.createElement('p');
+      const inputPriceMaxName = document.createElement('p');
+      accordionPanel.className = 'accordion-panel';
+      accordionPanel.className = 'accordion-panel-price';
+      inputPriceMin.className = 'min-price-input';
+      inputPriceMax.className = 'max-price-input';
+
+      inputPriceMin.type = 'number';
+      inputPriceMax.type = 'number';
+
+      inputPriceMinName.innerHTML = 'From';
+      inputPriceMaxName.innerHTML = 'To';
+      inputPriceMinName.style.fontSize = '16px';
+      inputPriceMaxName.style.fontSize = '16px';
+
+      priceMin.append(inputPriceMinName, inputPriceMin);
+      priceMax.append(inputPriceMaxName, inputPriceMax);
+
+      accordionPanel.append(priceMin, priceMax);
+      this.filterContainer.append(accordionPanel);
+    }
+    //accordion animation
+    filterAccordion.addEventListener('click', function () {
+      this.classList.toggle('active');
+
+      const panel = this.nextElementSibling;
+      if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+      } else {
+        panel.style.display = 'block';
+      }
+    });
+
+    return filter;
+  }
+
+  filterRendering() {
+    this.filterContainer.innerHTML = '';
+
+    const filtersElements = this.filterOptions.map(optionsData =>
+      this.renderFilter(optionsData)
+    );
+
+    return filtersElements;
+  }
+}
+
 const itemsBase = new GoodsDataBase();
 const renderCards = new RenderCards(itemsBase);
-
-// --------------- in progress, will be changed -------------- //
-
-// const liveSearch = document.querySelector('.search-request');
-
-// liveSearch.oninput = event => {
-//   const foundItems = itemsBase.searchByName(event.target.value);
-//   renderCards.rendering(foundItems);
-// };
-
-// accordion
-const accButtons = document.getElementsByClassName('accordion');
-
-for (let accButton of accButtons) {
-  accButton.addEventListener('click', function () {
-    this.classList.toggle('active');
-
-    const panel = this.nextElementSibling;
-    if (panel.style.display === 'block') {
-      panel.style.display = 'none';
-    } else {
-      panel.style.display = 'block';
-    }
-  });
-}
+const filter = new Filter(itemsBase, renderCards);
+const renderFilters = new RenderFilters(itemsBase, filter);
