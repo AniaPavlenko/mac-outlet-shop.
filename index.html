@@ -26,9 +26,25 @@
           <img src="img/banners/logo.jpg" alt="logo" />
         </div>
         <div class="cart">
-          <img src="img/icons/cart.svg" alt="cart" srcset="" />
+          <img
+            src="img/icons/cart-icon.png"
+            alt="cart"
+            srcset=""
+            class="cart-icon"
+          />
+          <div class="cart-icon-item-amount cart-icon-hidden">1</div>
         </div>
       </header>
+      <div class="cart-container cart-hidden">
+        <h2 class="cart-main-title">Shopping Cart</h2>
+        <h3 class="cart-sub-title">Checkout is almost done!</h3>
+        <div class="cart-added-items"></div>
+        <div class="cart-total-block">
+          <p class="total-item-qty">Total amount: <span>0 ptc.</span></p>
+          <p class="total-item-price">Total price: <span>$0</span></p>
+        </div>
+        <button class="cart-button">Buy</button>
+      </div>
       <section class="hero-section">
         <div class="swiper">
           <div class="swiper-wrapper">

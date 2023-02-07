@@ -118,7 +118,10 @@ class GoodsDataBase {
       .map(item => item.storage)
       .filter(
         (item, index, arr) => arr.indexOf(item) === index && item !== null
-      );
+      )
+      .sort((a, b) => {
+        return b - a;
+      });
   }
 
   get availableOS() {
@@ -371,7 +374,6 @@ class Filter {
 
   #findAndRerender() {
     const items = this.#itemsBase.filterItems({ ...this });
-    console.log('uuuuu', items);
     this.#rendering.rendering(items);
   }
 }
