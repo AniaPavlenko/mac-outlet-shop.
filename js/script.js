@@ -245,6 +245,11 @@ class RenderCards {
       iconDisable.classList.add('card-non-availability');
     }
 
+    primaryButton.addEventListener('click', () => {
+      cart.addToCart(item);
+      renderCart.renderCartItems(cart.items);
+    });
+
     // modal functional block
     const addModal = function () {
       const modal = document.querySelector('.main-modal');
@@ -510,7 +515,147 @@ class RenderFilters {
   }
 }
 
+class Cart {
+  constructor() {
+    this.items = [];
+  }
+
+  addToCart(item) {
+    const id = item.id;
+    const itemInCart = this.items.find(good => good.id === id);
+
+    if (itemInCart) {
+      if (itemInCart.amount < 4) {
+        itemInCart.amount++;
+      }
+      return itemInCart;
+    }
+    const addedItemToCart = {
+      id,
+      item,
+      amount: 1,
+    };
+    return this.items.push(addedItemToCart);
+  }
+
+  get totalAmount() {
+    return this.items.reduce((acc, good) => {
+      return acc + good.amount;
+    }, 0);
+  }
+
+  get totalPrice() {
+    return this.items.reduce((acc, good) => {
+      return acc + good.amount * good.item.price;
+    }, 0);
+  }
+
+  minusItem(item) {
+    const id = item.id;
+    const itemInCart = this.items.find(good => good.id === id);
+    if (itemInCart.amount > 1) {
+      itemInCart.amount--;
+    }
+
+    return cart.items;
+  }
+
+  removeItem(item) {
+    item.amount = 0;
+    this.items = this.items.filter(good => good.amount > 0);
+  }
+}
+
+class RenderCart {
+  constructor() {
+    this.cartContainer = document.querySelector('.cart-added-items');
+    this.renderCartItems(cart.items);
+    this.openCartModal();
+  }
+
+  renderCartItem(item) {
+    const cartItem = document.createElement('div');
+    cartItem.className = 'cart-added-element';
+    cartItem.innerHTML = `
+    <img src="${item.item.absoluteImgPath}" alt="${item.item.name}" class="cart-item-img" />
+          <div class="cart-right-block">
+            <p class="cart-item-name">${item.item.name}</p>
+            <p class="cart-item-price">$${item.item.price}</p>
+          </div>
+          <div class="cart-item-amount">
+            <img
+              src="img/icons/arrow_left.png"
+              alt=""
+              class="cart-item-amount-left-arrow"
+            />
+            <p class="cart-item-qty">${item.amount}</p>
+            <img
+              src="img/icons/arrow_right.png"
+              alt=""
+              class="cart-item-amount-right-arrow"
+            />
+            <img src="img/icons/remove.png" alt="" class="cart-item-delete" />
+    `;
+
+    const totalAmount = document.querySelector('.total-item-qty');
+    totalAmount.innerHTML = `Total amount: <span>${cart.totalAmount} ptc.</span>`;
+
+    const totalPrice = document.querySelector('.total-item-price');
+    totalPrice.innerHTML = `Total price: <span>$${cart.totalPrice}</span>`;
+
+    const cartIconItemAmount = document.querySelector('.cart-icon-item-amount');
+    if (cart.totalAmount > 0) {
+      cartIconItemAmount.classList.remove('cart-icon-hidden');
+      cartIconItemAmount.innerHTML = `${cart.totalAmount}`;
+    } else {
+      cartIconItemAmount.classList.add('.cart-icon-hidden');
+    }
+
+    const minusItem = cartItem.querySelector('.cart-item-amount-left-arrow');
+    minusItem.addEventListener('click', () => {
+      cart.minusItem(item);
+      renderCart.renderCartItems(cart.items);
+    });
+
+    const plusItem = cartItem.querySelector('.cart-item-amount-right-arrow');
+    plusItem.addEventListener('click', () => {
+      cart.addToCart(item);
+      renderCart.renderCartItems(cart.items);
+    });
+
+    const deteteItem = cartItem.querySelector('.cart-item-delete');
+    deteteItem.addEventListener('click', () => {
+      cart.removeItem(item);
+      renderCart.renderCartItems(cart.items);
+      totalAmount.innerHTML = `Total amount: <span>${cart.totalAmount} ptc.</span>`;
+      totalPrice.innerHTML = `Total price: <span>$${cart.totalPrice}</span>`;
+      cartIconItemAmount.innerHTML = `${cart.totalAmount}`;
+    });
+
+    return cartItem;
+  }
+
+  renderCartItems(items) {
+    this.cartContainer.innerHTML = ``;
+    let goods = items.map(item => {
+      return this.renderCartItem(item);
+    });
+    return this.cartContainer.append(...goods);
+  }
+
+  openCartModal() {
+    const cartIcon = document.querySelector('.cart-icon');
+    const cartModal = document.querySelector('.cart-container');
+
+    cartIcon.addEventListener('click', () => {
+      cartModal.classList.toggle('cart-hidden');
+    });
+  }
+}
+
 const itemsBase = new GoodsDataBase();
-const renderCards = new RenderCards(itemsBase);
+const cart = new Cart();
+const renderCart = new RenderCart(cart);
+const renderCards = new RenderCards(itemsBase, cart, renderCart);
 const filter = new Filter(itemsBase, renderCards);
 const renderFilters = new RenderFilters(itemsBase, filter);
